@@ -3,6 +3,7 @@ import styles from './btn.module.css'
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useState, useEffect } from 'react';
 import useApprove from '../../Hooks/useApprove'
+import useContractWrite from '../../Hooks/useContractWrite'
 
 const Btn = ( {children } ) => {
   return (
@@ -188,3 +189,51 @@ const ApproveBtn = ({ children, tokenContract, spenderAddress }) => {
 };
 
 export { ApproveBtn }
+
+
+const ContractFunctionBtn = ({ 
+  children, 
+  contract, 
+  functionName, 
+  callArgs = [], 
+  options = {},
+}) => {
+  const { callFunction, transactionHash, error, loading } = useContractWrite(contract, functionName, options);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
+  const [popupType, setPopupType] = useState(''); // "error" or "success"
+
+  useEffect(() => {
+    let timeoutId;
+    if (transactionHash) {
+      setShowPopup(true);
+      setPopupMessage(`${functionName} successful`);
+      setPopupType('success');
+      timeoutId = setTimeout(() => setShowPopup(false), 5000);
+    } else if (error) {
+      setShowPopup(true);
+      setPopupMessage(error);
+      setPopupType('error');
+      timeoutId = setTimeout(() => setShowPopup(false), 5000);
+    }
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [transactionHash, error, functionName]);
+
+  const handleButtonClick = async () => {
+    await callFunction(...callArgs);
+  };
+
+  return (
+    <div className={styles.btnWrapper}>
+      {showPopup && <Popup message={popupMessage} type={popupType} />}
+      <button className={`${styles.btn} ${styles.functionBtn} ${styles.smallBtn}`} onClick={handleButtonClick}>
+        {loading ? <LoadingSpinner /> : `${functionName} ${children}`}
+      </button>
+    </div>
+  );
+};
+
+export { ContractFunctionBtn }

@@ -9,7 +9,9 @@ import useTokenBalance from './Hooks/useTokenBalance'
 import useETHBalance from './Hooks/useETHBalance'
 import useTokenPrice from './Hooks/useTokenPrice'
 import useFDV from './Hooks/useFDV'
-import { ApproveBtn, ConnectBtn } from './Components/Btns/btn'
+import useContractWrite from './Hooks/useContractWrite'
+import { ApproveBtn, ConnectBtn, ContractFunctionBtn } from './Components/Btns/btn'
+import { ethers } from 'ethers'
 
 export default function Home() {
 
@@ -26,7 +28,9 @@ export default function Home() {
   const ethBalance = useETHBalance(provider, address);
   const tokenPrice = useTokenPrice(pairAddress, chain);
   const FDV = useFDV(pairAddress, chain);
+  
 
+  const amount = ethers.utils.parseUnits('1000000000000000000000000', 18);
 
 
 
@@ -42,6 +46,15 @@ export default function Home() {
      <ApproveBtn tokenContract={tokenContract} spenderAddress={spenderAddress}>
         ARB
       </ApproveBtn>
+
+      <ContractFunctionBtn 
+  contract={tokenContract} 
+  functionName="approve" 
+  callArgs={[spenderAddress, amount]} 
+  options={{ gasLimit: 1000000 }}
+>
+  ARB
+</ContractFunctionBtn>
     </main>
   )
 }
