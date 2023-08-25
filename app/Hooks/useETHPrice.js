@@ -1,15 +1,14 @@
-'use client'
+
 import { useState, useEffect } from 'react';
 
-const useTokenPrice = (pairAddress, chain, refreshTimestamp) => {
-    const baseURL = `https://api.dexscreener.com/latest/dex/pairs/${chain}`;
+const useETHPrice = (refreshTimestamp) => {
+    const baseURL = `https://api.dexscreener.com/latest/dex/pairs/ethereum/0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640`;
     const [priceUsd, setPriceUsd] = useState(0);
 
     useEffect(() => {
-        if (pairAddress) {
             const fetchPrice = async () => {
                 try {
-                    const response = await fetch(`${baseURL}/${pairAddress}`);
+                    const response = await fetch(`${baseURL}`);
                     const data = await response.json();
                     setPriceUsd(data.pair.priceUsd);
                 } catch (error) {
@@ -18,13 +17,12 @@ const useTokenPrice = (pairAddress, chain, refreshTimestamp) => {
             };
 
             fetchPrice();
-        }
-    }, [pairAddress, refreshTimestamp]);
+    }, [refreshTimestamp]);
 
     return priceUsd;
 };
 
-export default useTokenPrice;
+export default useETHPrice;
 
 
 

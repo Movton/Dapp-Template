@@ -1,6 +1,7 @@
+'use client'
 import { useState, useEffect } from 'react';
 
-const useFDV = (pairAddress, chain) => {
+const useFDV = (pairAddress, chain, refreshTimestamp) => {
     const baseURL = `https://api.dexscreener.com/latest/dex/pairs/${chain}`;
     const [FDV, setFDV] = useState("0");
 
@@ -19,7 +20,7 @@ const useFDV = (pairAddress, chain) => {
 
             fetchFDV();
         }
-    }, [pairAddress]);
+    }, [pairAddress, refreshTimestamp]);
 
     const formatFDV = (value) => {
         let finalValue;

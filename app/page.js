@@ -1,60 +1,121 @@
 'use client'
-import Image from 'next/image'
 import styles from '@/app/Styles/page.module.css'
+import { useEffect, useState } from 'react'
+import { ethers } from 'ethers'
 
 import { erc20ABI } from 'wagmi'
+
 import useAccount from './Hooks/useAccount'
 import useContract from './Hooks/useContract'
 import useTokenBalance from './Hooks/useTokenBalance'
 import useETHBalance from './Hooks/useETHBalance'
 import useTokenPrice from './Hooks/useTokenPrice'
+import useETHPrice from './Hooks/useETHPrice'
 import useFDV from './Hooks/useFDV'
-import useContractWrite from './Hooks/useContractWrite'
+import useContractRead from './Hooks/useContractRead'
+import useMultiplyAndFix from './Hooks/useMultiplyAndFix'
+
 import { ApproveBtn, ConnectBtn, ContractFunctionBtn } from './Components/Btns/btn'
-import { ethers } from 'ethers'
 
 export default function Home() {
 
-  const contractAddress = '0x912ce59144191c1204e64559fe8253a0e49e6548'
-  const pairAddress = '0xC6F780497A95e246EB9449f5e4770916DCd6396A'
+
+  // Used in the following hooks : useTokenBalance, useTokenPrice, useFDV, useApprove, useContractWrite, useContractRead
+  const contractAddress = '0x912CE59144191C1204E64559FE8253a0e49E6548'
+  // Used in the following hooks : useTokenPrice, useFDV
+  const pairAddress = '0xcDa53B1F66614552F834cEeF361A8D12a0B8DaD8'
+  // Used in the following hooks : useTokenBalance
   const decimals = 18;
+  // Used in the following hooks : useApprove, useContractWrite
   const spenderAddress = '0xE592427A0AEce92De3Edee1F18E0157C05861564'
+  // Used in the following hooks : useTokenPrice, useFDV
   const chain = 'arbitrum'
+  // Used in the following hook : useContractWrite
+  const amount = ethers.utils.parseUnits('0.1', 18);
 
 
+
+
+  // This is the hook that we use to create an instance of the provider, signer and address
   const { provider, signer, address } = useAccount();
+
+  // This is the hook that we use to create an instance of the contract
   const tokenContract = useContract(contractAddress, erc20ABI, signer);
-  const tokenBalance = useTokenBalance(tokenContract, address, decimals);
-  const ethBalance = useETHBalance(provider, address);
-  const tokenPrice = useTokenPrice(pairAddress, chain);
-  const FDV = useFDV(pairAddress, chain);
+
+
+
+
+  // This is the state that manages the refresh of the data
+  const [refreshTimestamp, setRefreshTimestamp] = useState(Date.now());
+
+  // These are the hooks that we use to read data from the contract, and fetch price from dexscreener
+  const tokenBalance = useTokenBalance(tokenContract, address, decimals, refreshTimestamp);
+  const ethBalance = useETHBalance(provider, address, refreshTimestamp);
+  const tokenPrice = useTokenPrice(pairAddress, chain, refreshTimestamp);
+  const ethPrice = useETHPrice(refreshTimestamp);
+  const FDV = useFDV(pairAddress, chain, refreshTimestamp);
+
+  // This is the hook that we use to multiply values and fix the number of decimals
+  const tokenBalanceinUsd = useMultiplyAndFix(tokenBalance, tokenPrice, 2);
+  const ethBalanceinUsd = useMultiplyAndFix(ethBalance, ethPrice, 2);
   
+  // This useEffect will refresh the data every minute
+  useEffect(() => {
+    const dataRefreshInterval = setInterval(() => {
+      setRefreshTimestamp(Date.now());
+    }, 60000);  
+    return () => clearInterval(dataRefreshInterval);
+  }, []);
 
-  const amount = ethers.utils.parseUnits('1000000000000000000000000', 18);
 
+
+
+
+  // This is the hook that we use to read data from the contract
+  const { callFunction, data, error, loading } = useContractRead(tokenContract);
+
+ // This useEffect will call the desired function every minute
+  useEffect(() => {
+    callFunction('decimals');
+
+    const interval = setInterval(() => {
+      callFunction('decimals');
+    }
+    , 60000);
+    return () => clearInterval(interval);
+
+  }, [address]);
 
 
   return (
     <main className={styles.main}>
-     <ConnectBtn />
-     <div className={styles.infos}>
-      <p>Token Balance: {tokenBalance}</p>
-      <p>ETH Balance: {ethBalance}</p>
-      <p>Token Price: {tokenPrice}</p>
-      <p>FDV: {FDV}</p>
-     </div>
-     <ApproveBtn tokenContract={tokenContract} spenderAddress={spenderAddress}>
-        ARB
-      </ApproveBtn>
+      <div className={styles.infos}>
+        <p>Token Balance: {tokenBalance}</p>
+        <p>Token Balance in USD: ${tokenBalanceinUsd}</p>
+        <p>ETH Balance: {ethBalance} $ETH</p>
+        <p>ETH Balance in USD: ${ethBalanceinUsd}</p>
+        <p>Token Price: ${tokenPrice}</p>
+        <p>ETH Price: ${ethPrice}</p>
+        <p>FDV: ${FDV}</p>
+        <p>Token Info: {data}</p>
+      </div>
+      <div className={styles.btns}>
+        <ApproveBtn
+          tokenContract={tokenContract}
+          spenderAddress={spenderAddress}
+        >
+          ARB
+        </ApproveBtn>
 
-      <ContractFunctionBtn 
-  contract={tokenContract} 
-  functionName="approve" 
-  callArgs={[spenderAddress, amount]} 
-  options={{ gasLimit: 1000000 }}
->
-  ARB
-</ContractFunctionBtn>
+        <ContractFunctionBtn
+          contract={tokenContract}
+          functionName="transfer"
+          callArgs={[address, amount]}
+          options={{ gasLimit: 1000000 }}
+        >
+          Transfer 1 ARB to self
+        </ContractFunctionBtn>
+      </div>
     </main>
-  )
+  );
 }

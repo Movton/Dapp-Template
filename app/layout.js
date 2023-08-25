@@ -36,6 +36,7 @@ const wagmiConfig = createConfig({
 })
 
 import localFont from 'next/font/local'
+import Header from './Components/Header/header';
 
 const myFont = localFont({ src: '../public/fonts/Roboto/Roboto-Regular.ttf' })
 
@@ -49,6 +50,7 @@ export default function RootLayout({ children }) {
       <body className={myFont.className}>
       <WagmiConfig config={wagmiConfig}>
         <RainbowKitProvider chains={chains}>
+          <Header />
           {children}
         </RainbowKitProvider>
       </WagmiConfig>

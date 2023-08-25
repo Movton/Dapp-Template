@@ -2,12 +2,31 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   gap: 4rem;
-  padding: 6rem;
+  padding: 6rem 6rem;
   min-height: 100vh;
 }
+
+@media screen and (max-width: 768px) {
+  .main {
+    padding: 6rem 4rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .main {
+    padding: 6rem 2rem;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .main {
+    padding: 6rem 1rem;
+  }
+}
+
 
 .infos {
   display: flex;
@@ -17,4 +36,12 @@
   gap: 1rem;
 
 
+}
+
+.btns {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
 }

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 
-const useTokenBalance = (contract, address, decimals) => {
+const useTokenBalance = (contract, address, decimals, refreshTimestamp) => {
     
     const [balance, setBalance] = useState("0.00");
 
@@ -12,7 +12,7 @@ const useTokenBalance = (contract, address, decimals) => {
                 try {
                     const rawBalance = await contract.balanceOf(address); 
                     const formattedBalance = ethers.utils.formatUnits(rawBalance, decimals);
-                    setBalance(parseFloat(formattedBalance).toFixed(2)); 
+                    setBalance(Math.floor(formattedBalance * 1000) / 1000);
                 } catch (error) {
                     console.error("An error occurred while fetching the token balance:", error);
                 }
@@ -20,7 +20,7 @@ const useTokenBalance = (contract, address, decimals) => {
 
             fetchBalance();
         }
-    }, [contract, address]);
+    }, [contract, address, refreshTimestamp]);
 
     return balance;
 };

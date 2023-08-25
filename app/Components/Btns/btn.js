@@ -179,17 +179,46 @@ const ApproveBtn = ({ children, tokenContract, spenderAddress }) => {
   }, [transactionHash, error]);
 
   return (
-    <div className={styles.approveBtnWrapper}>
-      {showPopup && <Popup message={popupMessage} type={popupType} />}
-      <button className={`${styles.btn} ${styles.approveBtn} ${styles.smallBtn}`} onClick={() => approve()}>
-        {loading ? <LoadingSpinner /> : `Approve ${children}`}
-      </button>
-    </div>
+    <ConnectButton.Custom>
+      {({
+        account,
+        chain,
+        openConnectModal,
+        authenticationStatus,
+        mounted,
+      }) => {
+        const ready = mounted !== 'loading';
+        const connected = ready && account && chain;
+
+        if (!connected) {
+          return (
+            <button 
+              onClick={openConnectModal} 
+              type="button" 
+              className={`${styles.btn} ${styles.smallBtn} ${styles.connectBtn}`}
+            >
+              Connect Wallet
+            </button>
+          );
+        } else {
+          return (
+            <div className={styles.approveBtnWrapper}>
+              {showPopup && <Popup message={popupMessage} type={popupType} />}
+              <button 
+                className={`${styles.btn} ${styles.approveBtn} ${styles.smallBtn}`} 
+                onClick={() => approve()}
+              >
+                {loading ? <LoadingSpinner /> : `Approve ${children}`}
+              </button>
+            </div>
+          );
+        }
+      }}
+    </ConnectButton.Custom>
   );
 };
 
-export { ApproveBtn }
-
+export { ApproveBtn };
 
 const ContractFunctionBtn = ({ 
   children, 
@@ -216,7 +245,6 @@ const ContractFunctionBtn = ({
       setPopupType('error');
       timeoutId = setTimeout(() => setShowPopup(false), 5000);
     }
-
     return () => {
       clearTimeout(timeoutId);
     };
@@ -227,13 +255,43 @@ const ContractFunctionBtn = ({
   };
 
   return (
-    <div className={styles.btnWrapper}>
-      {showPopup && <Popup message={popupMessage} type={popupType} />}
-      <button className={`${styles.btn} ${styles.functionBtn} ${styles.smallBtn}`} onClick={handleButtonClick}>
-        {loading ? <LoadingSpinner /> : `${functionName} ${children}`}
-      </button>
-    </div>
+    <ConnectButton.Custom>
+      {({
+        account,
+        chain,
+        openConnectModal,
+        authenticationStatus,
+        mounted,
+      }) => {
+        const ready = mounted !== 'loading';
+        const connected = ready && account && chain;
+
+        if (!connected) {
+          return (
+            <button 
+              onClick={openConnectModal} 
+              type="button" 
+              className={`${styles.btn} ${styles.smallBtn} ${styles.connectBtn}`}
+            >
+              Connect Wallet
+            </button>
+          );
+        } else {
+          return (
+            <div className={styles.btnWrapper}>
+              {showPopup && <Popup message={popupMessage} type={popupType} />}
+              <button 
+                className={`${styles.btn} ${styles.functionBtn} ${styles.smallBtn}`} 
+                onClick={handleButtonClick}
+              >
+                {loading ? <LoadingSpinner /> : `${children}`}
+              </button>
+            </div>
+          );
+        }
+      }}
+    </ConnectButton.Custom>
   );
 };
 
-export { ContractFunctionBtn }
+export { ContractFunctionBtn };
