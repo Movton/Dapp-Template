@@ -1,16 +1,22 @@
 {
-  "name": "template",
+  "name": "moutondapp",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "create": "cp -r ./template ../nom_du_nouveau_dossier"
   },
   "dependencies": {
+    "@rainbow-me/rainbowkit": "^1.0.9",
+    "ethers": "^5.7.2",
     "next": "13.4.19",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "viem": "^1.7.0",
+    "wagmi": "^1.3.10"
   }
+  
 }
