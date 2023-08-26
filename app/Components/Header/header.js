@@ -13,6 +13,10 @@ const Header = () => {
         setIsOpen(prevIsOpen => !prevIsOpen)
     }
 
+    const redirectToHome = () => {
+        window.location.href = '/'
+    }
+
 
   return (
     <>
@@ -25,7 +29,7 @@ const Header = () => {
     <Image src="/images/assets/logo.png" alt="logo" width={250} height={95} className={styles.mobileLogo} />
         <div className={`${styles.header} ${isOpen ? styles.open : ''}`}>
             <div className={styles.logo}>
-                <Image src="/images/assets/logo.png" alt="logo" width={250} height={95} />
+                <Image src="/images/assets/logo.png" alt="logo" width={250} height={95}  onClick={redirectToHome} />
             </div>
             <nav className={styles.nav}>
                 <ul className={styles.navLinks}>

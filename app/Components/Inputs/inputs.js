@@ -79,15 +79,13 @@ const NativeTokenInput = ({
   callArgs,
   balance,
   ticker,
-  decimals,
   buttonText,
 }) => {
   const [inputValue, setInputValue] = useState('');
   const sanitizedValue = inputValue.replace(',', '.');
   
-  const formattedValue = ethers.utils.parseUnits(
+  const formattedValue = ethers.utils.parseEther(
     sanitizedValue || '0',
-    decimals
   );
 
   const handleInputChange = (e) => {
