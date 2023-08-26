@@ -38,22 +38,24 @@ const myTheme = merge(darkTheme(), {
 
   // ADD A CUSTOM CHAIN HERE, then pass it to configureChains in the array
  
-/* export const shibarium = {
-  id: 109,
-  name: 'Shibarium',
-  network: 'shibarium',
+/* export const avalanche = {
+  id: 43_114,
+  name: 'Avalanche',
+  network: 'avalanche',
+  iconUrl: 'https://example.com/icon.svg',
+  iconBackground: '#fff',
   nativeCurrency: {
     decimals: 18,
-    name: 'Shibarium',
-    symbol: 'BONE',
+    name: 'Avalanche',
+    symbol: 'AVAX',
   },
   rpcUrls: {
-    public: { http: ['https://www.shibrpc.com'] },
-    default: { http: ['https://www.shibrpc.com'] },
+    public: { http: ['https://api.avax.network/ext/bc/C/rpc'] },
+    default: { http: ['https://api.avax.network/ext/bc/C/rpc'] },
   },
   blockExplorers: {
-    etherscan: { name: 'ShibariumScan', url: 'https://shibariumscan.io' },
-    default: { name: 'ShibariumScan', url: 'https://shibariumscan.io' },
+    default: { name: 'SnowTrace', url: 'https://snowtrace.io' },
+    etherscan: { name: 'SnowTrace', url: 'https://snowtrace.io' },
   },
   contracts: {
     multicall3: {
@@ -61,6 +63,7 @@ const myTheme = merge(darkTheme(), {
       blockCreated: 11_907_934,
     },
   },
+  testnet: false,
 }
  */
 
