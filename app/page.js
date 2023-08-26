@@ -16,6 +16,7 @@ import useContractRead from './Hooks/useContractRead'
 import useMultiplyAndFix from './Hooks/useMultiplyAndFix'
 
 import { ApproveBtn, ConnectBtn, ContractFunctionBtn } from './Components/Btns/btn'
+import { NativeTokenInput, TokenInput } from './Components/Inputs/inputs'
 
 export default function Home() {
 
@@ -33,6 +34,7 @@ export default function Home() {
   // Used in the following hook : useContractWrite
   const amount = ethers.utils.parseUnits('0.1', 18);
 
+  const ticker = 'ARB'
 
 
 
@@ -115,6 +117,28 @@ export default function Home() {
         >
           Transfer 1 ARB to self
         </ContractFunctionBtn>
+      </div>
+      <div className={styles.inputs}>
+        <TokenInput
+          tokenContract={tokenContract}
+          spenderAddress={spenderAddress}
+          functionName="transfer"
+          callArgs={[address]}
+          balance={tokenBalance}
+          ticker={ticker}
+          decimals={decimals}
+          buttonText={`Send ${ticker}`}
+        />
+        <NativeTokenInput
+          contract={''}
+          functionName="buyTokens"
+          callArgs={[]}
+          balance={ethBalance}
+          ticker={'ETH'}
+          decimals={18}
+          buttonText={`Send ETH`}
+        />
+          
       </div>
     </main>
   );

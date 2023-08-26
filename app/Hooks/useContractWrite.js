@@ -46,6 +46,7 @@ const useContractWrite = (contract, functionName, options = {}) => {
             setTransactionHash(formatHash(receipt.transactionHash));
         } catch (err) {
             setError(formatError(err));
+            console.error(err);
         } finally {
             setLoading(false);
         }

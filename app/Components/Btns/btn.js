@@ -152,7 +152,7 @@ const Popup = ({ message, type }) => {
 
 
 
-const ApproveBtn = ({ children, tokenContract, spenderAddress }) => {
+const ApproveBtn = ({ children, tokenContract, spenderAddress, amount }) => {
   const { approve, transactionHash, error, loading } = useApprove(tokenContract, spenderAddress);
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
@@ -206,7 +206,7 @@ const ApproveBtn = ({ children, tokenContract, spenderAddress }) => {
               {showPopup && <Popup message={popupMessage} type={popupType} />}
               <button 
                 className={`${styles.btn} ${styles.approveBtn} ${styles.smallBtn}`} 
-                onClick={() => approve()}
+                onClick={() => approve(amount)}
               >
                 {loading ? <LoadingSpinner /> : `Approve ${children}`}
               </button>
