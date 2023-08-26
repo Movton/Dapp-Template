@@ -119,7 +119,7 @@ const NativeTokenInput = ({
         <ContractFunctionBtn
           contract={contract}
           functionName={functionName}
-          callArgs={[...callArgs, formattedValue]}
+          callArgs={[...callArgs]}
           options={{ gasLimit: 1000000, value: sanitizedValue }}
         >
           {buttonText}

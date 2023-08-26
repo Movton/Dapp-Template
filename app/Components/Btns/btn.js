@@ -260,7 +260,6 @@ const ContractFunctionBtn = ({
         account,
         chain,
         openConnectModal,
-        authenticationStatus,
         mounted,
       }) => {
         const ready = mounted !== 'loading';
