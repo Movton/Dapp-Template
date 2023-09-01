@@ -13,12 +13,31 @@ const useAccount = () => {
             const signerInstance = providerInstance.getSigner();
             setProvider(providerInstance);
             setSigner(signerInstance);
-            
-            signerInstance.getAddress().then(resAddress => {
+    
+            const updateAddress = async () => {
+                const resAddress = await signerInstance.getAddress();
                 setAddress(resAddress);
-            });
+            }
+    
+            
+            updateAddress();
+    
+            const handleAccountsChanged = (accounts) => {
+                updateAddress();
+                console.log(accounts);
+            }
+    
+            
+            window.ethereum.on('accountsChanged', handleAccountsChanged);
+    
+            
+            return () => {
+                window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+            };
         }
     }, []);
+    
+    
 
     return { provider, signer, address };
 };

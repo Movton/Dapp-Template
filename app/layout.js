@@ -88,7 +88,7 @@ const { chains, publicClient } = configureChains(
 
 const { connectors } = getDefaultWallets({
   appName: 'My RainbowKit App',
-  projectId: 'My_Project_ID',
+  projectId: '9ecc3864393bfba161008137a6c49651',
   chains
 });
 
