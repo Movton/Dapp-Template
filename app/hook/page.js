@@ -2,13 +2,13 @@
 import styles from "@/app/Styles/hooks.module.css";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { validateAndLogData } from "../Utils/validateData";
 
-import { erc20ABI } from "wagmi";
+import { erc20Abi } from "viem";
 
 import useAccount from "../Hooks/useAccount";
 import useContract from "../Hooks/useContract";
 import useTokenBalance from "../Hooks/useTokenBalance";
+import useCheckAllowance from "../Hooks/useCheckAllowance";
 import useETHBalance from "../Hooks/useETHBalance";
 import useTokenPrice from "../Hooks/useTokenPrice";
 import useETHPrice from "../Hooks/useETHPrice";
@@ -16,22 +16,27 @@ import useFDV from "../Hooks/useFDV";
 import useContractRead from "../Hooks/useContractRead";
 import useMultiplyAndFix from "../Hooks/useMultiplyAndFix";
 
-import { ApproveBtn, ContractFunctionBtn } from "../Components/Btns/btn";
+import {
+  ApproveAndExecuteBtn,
+  ApproveBtn,
+  ContractFunctionBtn,
+} from "../Components/Btns/btn";
 import { NativeTokenInput, TokenInput } from "../Components/Inputs/inputs";
 
 export default function Hooks() {
-  // Used in the following hooks : useTokenBalance, useTokenPrice, useFDV, useApprove, useContractWrite, useContractRead
-  const contractAddress = "0x912CE59144191C1204E64559FE8253a0e49E6548";
-  // Used in the following hooks : useTokenPrice, useFDV
-  const pairAddress = "0xcDa53B1F66614552F834cEeF361A8D12a0B8DaD8";
-  // Used in the following hooks : useTokenBalance
+  // Used in the following hooks: useTokenBalance, useTokenPrice, useFDV, useApprove, useContractWrite, useContractRead
+  const contractAddress = "0x912ce59144191c1204e64559fe8253a0e49e6548";
+  // Used in the following hooks: useTokenPrice, useFDV
+  const pairAddress = "0xC6F780497A95e246EB9449f5e4770916DCd6396A";
+  // Used in the following hooks: useTokenBalance
   const decimals = 18;
-  // Used in the following hooks : useApprove, useContractWrite
+  // Used in the following hooks: useApprove, useContractWrite
   const spenderAddress = "0xE592427A0AEce92De3Edee1F18E0157C05861564";
-  // Used in the following hooks : useTokenPrice, useFDV
+  // Used in the following hooks: useTokenPrice, useFDV
   const chain = "arbitrum";
-  // Used in the following hook : useContractWrite
-  const amount = ethers.utils.parseUnits("0.1", 18);
+
+  const amount = "1";
+  const formattedAmount = ethers.utils.formatUnits(amount, 18);
 
   const ticker = "ARB";
 
@@ -39,9 +44,9 @@ export default function Hooks() {
   const { provider, signer, address } = useAccount();
 
   // This is the hook that we use to create an instance of the contract
-  const tokenContract = useContract(contractAddress, erc20ABI, signer);
+  const tokenContract = useContract(contractAddress, erc20Abi, signer);
 
-  // This is the state that manages the refresh of the data
+  // This is the state that manages the refresh of the datas
   const [refreshTimestamp, setRefreshTimestamp] = useState(Date.now());
 
   // These are the hooks that we use to read data from the contract, and fetch price from dexscreener
@@ -51,6 +56,14 @@ export default function Hooks() {
     decimals,
     refreshTimestamp
   );
+  const hasSufficientAllowance = useCheckAllowance(
+    address,
+    tokenContract,
+    spenderAddress,
+    amount,
+    decimals
+  );
+
   const ethBalance = useETHBalance(provider, address, refreshTimestamp);
   const tokenPrice = useTokenPrice(pairAddress, chain, refreshTimestamp);
   const ethPrice = useETHPrice(refreshTimestamp);
@@ -64,7 +77,7 @@ export default function Hooks() {
   useEffect(() => {
     const dataRefreshInterval = setInterval(() => {
       setRefreshTimestamp(Date.now());
-    }, 60000);
+    }, 10000); // refresh data every 10 seconds
     return () => clearInterval(dataRefreshInterval);
   }, []);
 
@@ -77,30 +90,15 @@ export default function Hooks() {
 
     const interval = setInterval(() => {
       callFunction("decimals");
-    }, 60000);
+    }, 10000);
     return () => clearInterval(interval);
   }, [address]);
 
-  // DATA VALIDATION
-
-  useEffect(() => {
-    console.log(
-      "%c TITLE",
-      "color: #ff0000; font-size: 20px; font-weight: bold;"
-    );
-
-    console.log(
-      "%c SUBTITLE",
-      "color: #00ff00; font-size: 18px; font-weight: bold;"
-    );
-    validateAndLogData(data, "useContractRead");
-  }, [data]);
-
   return (
     <main className={styles.main}>
-      <h1>Eien Custom Hooks</h1>
+      <h1>Movton Custom Hooks</h1>
       <div className={styles.infos}>
-        <h2>Fetch Token Infos :</h2>
+        <h2>Fetch Token Infos:</h2>
         <div className={styles.info}>
           <h3>Token Balance:</h3>
           <p>{tokenBalance}</p>
@@ -110,16 +108,16 @@ export default function Hooks() {
           <p>${tokenBalanceinUsd}</p>
         </div>
         <div className={styles.info}>
+          <h3>Token Price:</h3>
+          <p>${tokenPrice}</p>
+        </div>
+        <div className={styles.info}>
           <h3>ETH Balance:</h3>
           <p>{ethBalance} $ETH</p>
         </div>
         <div className={styles.info}>
           <h3>ETH Balance in USD:</h3>
           <p>${ethBalanceinUsd}</p>
-        </div>
-        <div className={styles.info}>
-          <h3>Token Price:</h3>
-          <p>${tokenPrice}</p>
         </div>
         <div className={styles.info}>
           <h3>ETH Price:</h3>
@@ -135,10 +133,10 @@ export default function Hooks() {
         </div>
       </div>
       <div className={styles.btnsContainer}>
-        <h2>Custom Buttons :</h2>
+        <h2>Custom Buttons:</h2>
         <div className={styles.btns}>
           <div className={styles.btn}>
-            <h3>Approve Button : </h3>
+            <h3>Approve Button: </h3>
             <p>Easily approve spending for any token, to any contract.</p>
             <ApproveBtn
               tokenContract={tokenContract}
@@ -148,26 +146,44 @@ export default function Hooks() {
             </ApproveBtn>
           </div>
           <div className={styles.btn}>
-            <h3>Contract Function Button : </h3>
+            <h3>Contract Function Button: </h3>
             <p>Easily call any function of any contract.</p>
             <ContractFunctionBtn
               contract={tokenContract}
               functionName="transfer"
-              callArgs={[address, amount]}
+              callArgs={[address, formattedAmount]}
               options={{ gasLimit: 1000000 }}
             >
               Transfer 1 ARB to self
             </ContractFunctionBtn>
           </div>
+          <div className={styles.btn}>
+            <h3>Approve And Execute Button:</h3>
+            <p>Easily approve and execute a function of any contract.</p>
+            <ApproveAndExecuteBtn
+              address={address}
+              tokenContract={tokenContract}
+              spenderAddress={spenderAddress}
+              contract={tokenContract}
+              functionName="transfer"
+              callArgs={[address, formattedAmount]}
+              options={{ gasLimit: 1000000 }}
+              amount={formattedAmount}
+              hasSufficientAllowance={hasSufficientAllowance}
+            >
+              Approve and Transfer 1 ARB to self
+            </ApproveAndExecuteBtn>
+          </div>
         </div>
       </div>
       <div className={styles.inputsContainer}>
-        <h2>Custom Inputs :</h2>
+        <h2>Custom Inputs:</h2>
         <div className={styles.inputs}>
           <div className={styles.input}>
             <p>Easily customize the input to send any token to any contract:</p>
 
             <TokenInput
+              address={address}
               tokenContract={tokenContract}
               spenderAddress={spenderAddress}
               functionName="transfer"

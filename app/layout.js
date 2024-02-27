@@ -1,18 +1,14 @@
-'use client'
-import '@/app/Styles/globals.css'
-import localFont from 'next/font/local'
-import Header from './Components/Header/header';
+"use client";
+import "@/app/Styles/globals.css";
+import localFont from "next/font/local";
+import Header from "./Components/Header/header";
 
-import '@rainbow-me/rainbowkit/styles.css';
-import {
-  getDefaultWallets,
-  RainbowKitProvider,
-} from '@rainbow-me/rainbowkit';
-import { configureChains, createConfig, WagmiConfig } from 'wagmi';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
-import { publicProvider } from 'wagmi/providers/public';
+import "@rainbow-me/rainbowkit/styles.css";
 
-
+import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { WagmiProvider } from "wagmi";
+import { mainnet, polygon, optimism, arbitrum, base, zora } from "wagmi/chains";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 // ADD A CUSTOM THEME HERE, then pass it to RainbowKitProvider
 
@@ -32,12 +28,8 @@ const myTheme = merge(darkTheme(), {
 });
  */
 
+// ADD A CUSTOM CHAIN HERE, then pass it to configureChains in the array
 
-
-
-
-  // ADD A CUSTOM CHAIN HERE, then pass it to configureChains in the array
- 
 /* export const avalanche = {
   id: 43_114,
   name: 'Avalanche',
@@ -67,44 +59,16 @@ const myTheme = merge(darkTheme(), {
 }
  */
 
-
-
-
-
-import {
-  arbitrum,
-  mainnet
-} from 'wagmi/chains';
-
-
-
-const { chains, publicClient } = configureChains(
-  [arbitrum],
-  [
-    // alchemyProvider({ apiKey: process.env.ALCHEMY_ID }),
-    publicProvider()
-  ]
-);
-
-const { connectors } = getDefaultWallets({
-  appName: 'My RainbowKit App',
-  projectId: '9ecc3864393bfba161008137a6c49651',
-  chains
+const config = getDefaultConfig({
+  appName: "My RainbowKit App",
+  projectId: "YOUR_PROJECT_ID",
+  chains: [mainnet, polygon, optimism, arbitrum, base, zora],
+  ssr: true, // If your dApp uses server side rendering (SSR)
 });
 
+const queryClient = new QueryClient();
 
-
-const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors,
-  publicClient
-})
-
-
-
-
-
-const myFont = localFont({ src: '../public/fonts/Roboto/Roboto-Regular.ttf' })
+const myFont = localFont({ src: "../public/fonts/Roboto/Roboto-Regular.ttf" });
 
 export default function RootLayout({ children }) {
   return (
@@ -114,13 +78,15 @@ export default function RootLayout({ children }) {
         <meta name="description" content="" />
       </head>
       <body className={myFont.className}>
-      <WagmiConfig config={wagmiConfig}>
-        <RainbowKitProvider chains={chains}>
-          <Header />
-          {children}
-        </RainbowKitProvider>
-      </WagmiConfig>
-        </body>
+        <WagmiProvider config={config}>
+          <QueryClientProvider client={queryClient}>
+            <RainbowKitProvider>
+              <Header />
+              {children}
+            </RainbowKitProvider>
+          </QueryClientProvider>
+        </WagmiProvider>
+      </body>
     </html>
-  )
+  );
 }

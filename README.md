@@ -1,4 +1,4 @@
-Made with Love by [Eien](https://twitter.com/EienDev_).
+Made with Love by [Movton](https://twitter.com/putaindmouton).
 
 This is a template for a Dapp using [Next.js](https://nextjs.org/), [Ethers.js](https://docs.ethers.io/v5/) and [RainbowKit](https://www.rainbowkit.com/docs/introduction).
 

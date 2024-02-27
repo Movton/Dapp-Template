@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import styles from './inputs.module.css';
-import { ethers } from 'ethers';
-import { ApproveBtn, ContractFunctionBtn } from '../Btns/btn';
+import { useState } from "react";
+import styles from "./inputs.module.css";
+import { ethers } from "ethers";
+import { ApproveBtn, ContractFunctionBtn } from "../Btns/btn";
+import useCheckAllowance from "@/app/Hooks/useCheckAllowance";
 
 const TokenInput = ({
+  address,
   tokenContract,
   functionName,
   spenderAddress,
@@ -13,11 +15,11 @@ const TokenInput = ({
   decimals,
   buttonText,
 }) => {
-  const [inputValue, setInputValue] = useState('');
-  const sanitizedValue = inputValue.replace(',', '.');
+  const [inputValue, setInputValue] = useState("");
+  const sanitizedValue = inputValue.replace(",", ".");
 
   const formattedValue = ethers.utils.parseUnits(
-    sanitizedValue || '0',
+    sanitizedValue || "0",
     decimals
   );
 
@@ -28,12 +30,20 @@ const TokenInput = ({
     }
   };
 
+  const hasSufficientAllowance = useCheckAllowance(
+    address,
+    tokenContract,
+    spenderAddress,
+    sanitizedValue,
+    decimals
+  );
+
   return (
     <div className={styles.container}>
       <div className={styles.balance}>
         <span className={styles.span}>Balance: </span>
         <span className={styles.balanceValue}>
-          {balance} {ticker || ''}
+          {balance} {ticker || ""}
         </span>
       </div>
       <div className={styles.input}>
@@ -44,25 +54,30 @@ const TokenInput = ({
           value={sanitizedValue}
           onChange={handleInputChange}
         />
-        <button className={styles.max} onClick={() => setInputValue(String(balance))}>
+        <button
+          className={styles.max}
+          onClick={() => setInputValue(String(balance))}
+        >
           MAX
         </button>
       </div>
       <div className={styles.btn}>
-        <ApproveBtn
-          tokenContract={tokenContract}
-          spenderAddress={spenderAddress}
-          amount={formattedValue}
-        >
-        {ticker || ''}
-        </ApproveBtn>
+        {!hasSufficientAllowance && (
+          <ApproveBtn
+            tokenContract={tokenContract}
+            spenderAddress={spenderAddress}
+            amount={formattedValue}
+          >
+            {ticker || ""}
+          </ApproveBtn>
+        )}
         <ContractFunctionBtn
           contract={tokenContract}
           functionName={functionName}
           callArgs={[...callArgs, formattedValue]}
           options={{ gasLimit: 1000000 }}
         >
-            {buttonText}
+          {buttonText}
         </ContractFunctionBtn>
       </div>
     </div>
@@ -70,8 +85,6 @@ const TokenInput = ({
 };
 
 export { TokenInput };
-
-
 
 const NativeTokenInput = ({
   contract,
@@ -81,12 +94,10 @@ const NativeTokenInput = ({
   ticker,
   buttonText,
 }) => {
-  const [inputValue, setInputValue] = useState('');
-  const sanitizedValue = inputValue.replace(',', '.');
-  
-  const formattedValue = ethers.utils.parseEther(
-    sanitizedValue || '0',
-  );
+  const [inputValue, setInputValue] = useState("");
+  const sanitizedValue = inputValue.replace(",", ".");
+
+  const formattedValue = ethers.utils.parseEther(sanitizedValue || "0");
 
   const handleInputChange = (e) => {
     const regex = /^[0-9]*[.,]?[0-9]*$/;
@@ -100,7 +111,7 @@ const NativeTokenInput = ({
       <div className={styles.balance}>
         <span className={styles.span}>Balance: </span>
         <span className={styles.balanceValue}>
-          {balance} {ticker || ''}
+          {balance} {ticker || ""}
         </span>
       </div>
       <div className={styles.input}>
@@ -111,7 +122,10 @@ const NativeTokenInput = ({
           value={sanitizedValue}
           onChange={handleInputChange}
         />
-        <button className={styles.max} onClick={() => setInputValue(String(balance))}>
+        <button
+          className={styles.max}
+          onClick={() => setInputValue(String(balance))}
+        >
           MAX
         </button>
       </div>
@@ -130,4 +144,3 @@ const NativeTokenInput = ({
 };
 
 export { NativeTokenInput };
-

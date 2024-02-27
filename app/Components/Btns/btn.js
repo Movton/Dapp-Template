@@ -4,6 +4,9 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useState, useEffect } from "react";
 import useApprove from "../../Hooks/useApprove";
 import useContractWrite from "../../Hooks/useContractWrite";
+import useCheckAllowance from "@/app/Hooks/useCheckAllowance";
+import { ethers } from "ethers";
+import { call } from "viem/actions";
 
 const Btn = ({ children }) => {
   return <button className={styles.btn}>{children}</button>;
@@ -290,13 +293,16 @@ const ContractFunctionBtn = ({
 export { ContractFunctionBtn };
 
 const ApproveAndExecuteBtn = ({
+  address,
   tokenContract,
   spenderAddress,
   contract,
   functionName,
   callArgs = [],
-  children,
+  options = {},
   amount,
+  children,
+  hasSufficientAllowance,
 }) => {
   const {
     approve,
@@ -309,32 +315,11 @@ const ApproveAndExecuteBtn = ({
     transactionHash: contractTxHash,
     error: contractError,
     loading: contractLoading,
-  } = useContractWrite(contract, functionName, callArgs);
+  } = useContractWrite(contract, functionName, callArgs, options);
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState("");
-  const [hasSufficientAllowance, setHasSufficientAllowance] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
-  const amountToMint = amount.toString();
-
-  useEffect(() => {
-    const checkAllowance = async () => {
-      try {
-        const allowance = await tokenContract.allowance(
-          account,
-          spenderAddress
-        );
-        const requiredAmount = ethers.utils.parseUnits(amountToMint, 18);
-        setHasSufficientAllowance(allowance.gte(requiredAmount));
-      } catch (error) {
-        console.error("Error checking allowance", error);
-      }
-    };
-
-    if (account) {
-      checkAllowance();
-    }
-  }, [account, tokenContract, spenderAddress, amountToMint]);
 
   useEffect(() => {
     if (approveTxHash) {
@@ -365,12 +350,13 @@ const ApproveAndExecuteBtn = ({
     setIsApproved(hasSufficientAllowance);
   }, [hasSufficientAllowance]);
 
-  const handleApprove = () => {
-    approve(ethers.utils.parseUnits(amountToMint, 18));
+  const handleApprove = async () => {
+    await approve(amount);
+    await callFunction(...callArgs);
   };
 
-  const handleExecute = async () => {
-    await callFunction();
+  const handleTransaction = async () => {
+    await callFunction(...callArgs);
   };
 
   return (
@@ -381,7 +367,11 @@ const ApproveAndExecuteBtn = ({
 
         if (!connected) {
           return (
-            <button onClick={openConnectModal} type="button">
+            <button
+              onClick={openConnectModal}
+              type="button"
+              className={`${styles.btn} ${styles.smallBtn} ${styles.connectBtn}`}
+            >
               Connect Wallet
             </button>
           );
@@ -395,11 +385,11 @@ const ApproveAndExecuteBtn = ({
                   disabled={approveLoading}
                   className={`${styles.btn} ${styles.approveBtn} ${styles.smallBtn}`}
                 >
-                  {approveLoading ? <LoadingSpinner /> : `Approve ${children}`}
+                  {approveLoading ? <LoadingSpinner /> : `${children}`}
                 </button>
               ) : (
                 <button
-                  onClick={handleExecute}
+                  onClick={handleTransaction}
                   disabled={contractLoading}
                   className={`${styles.btn} ${styles.functionBtn} ${styles.smallBtn}`}
                 >
